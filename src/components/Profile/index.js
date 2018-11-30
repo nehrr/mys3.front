@@ -7,9 +7,9 @@ export default class Profile extends Component {
   //profile
 
   state = {
-    nickname: "Shepard",
-    email: "a@a.fr",
-    age: "39",
+    nickname: "",
+    email: "",
+    age: "",
     password: "",
     password_confirmation: ""
   };
@@ -58,6 +58,17 @@ export default class Profile extends Component {
             placeholder={email}
             onChange={e => {
               this._update("email", e.target.value);
+            }}
+          />
+        </p>
+        <p>
+          Age
+          <TextInputField
+            width={300}
+            name="text-input-age"
+            placeholder={age}
+            onChange={e => {
+              this._update("age", e.target.value);
             }}
           />
         </p>

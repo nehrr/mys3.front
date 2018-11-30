@@ -20,8 +20,8 @@ const tabCo = [
 
 class App extends Component {
   state = {
-    isConnected: true,
-    name: "Shepard"
+    isConnected: false,
+    name: ""
   };
 
   buckets = [

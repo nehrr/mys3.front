@@ -5,7 +5,21 @@ import "antd/dist/antd.css";
 
 export default class Profile extends Component {
   //profile
+
+  state = {
+    nickname: "Shepard",
+    email: "a@a.fr",
+    age: "39",
+    password: "",
+    password_confirmation: ""
+  };
+
+  _update(field, value) {
+    this.setState({ [field]: value });
+  }
+
   render() {
+    const { nickname, email, age } = this.state;
     return (
       <Card
         style={{ width: 360 }}
@@ -19,7 +33,7 @@ export default class Profile extends Component {
           <Button
             type="primary"
             size="small"
-            onClick={() => console.log("click")}
+            onClick={() => console.log(this.state)}
           >
             Edit
           </Button>
@@ -30,9 +44,9 @@ export default class Profile extends Component {
           <TextInputField
             width={300}
             name="text-input-nickname"
-            placeholder="Nickname"
+            placeholder={nickname}
             onChange={e => {
-              console.log(e.target.value);
+              this._update("nickname", e.target.value);
             }}
           />
         </p>
@@ -41,9 +55,9 @@ export default class Profile extends Component {
           <TextInputField
             width={300}
             name="text-input-email"
-            placeholder="Email"
+            placeholder={email}
             onChange={e => {
-              console.log(e.target.value);
+              this._update("email", e.target.value);
             }}
           />
         </p>
@@ -52,9 +66,9 @@ export default class Profile extends Component {
           <TextInputField
             width={300}
             name="text-input-age"
-            placeholder="Age"
+            placeholder={age}
             onChange={e => {
-              console.log(e.target.value);
+              this._update("age", e.target.value);
             }}
           />
         </p>
@@ -65,6 +79,18 @@ export default class Profile extends Component {
             type="password"
             name="text-input-password"
             placeholder="Password"
+            onChange={e => {
+              console.log(e.target.value);
+            }}
+          />
+        </p>
+        <p>
+          Password Confirmation
+          <TextInputField
+            width={300}
+            type="password"
+            name="text-input-password-confirmation"
+            placeholder="Password Confirmation"
             onChange={e => {
               console.log(e.target.value);
             }}

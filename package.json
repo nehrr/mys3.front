@@ -5,6 +5,7 @@
   "dependencies": {
     "antd": "^3.10.9",
     "evergreen-ui": "^4.8.0",
+    "jsonwebtoken": "^8.4.0",
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
     "react-router-dom": "^4.3.1",

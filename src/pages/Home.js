@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Redirect, Route } from "react-router-dom";
 import { TextInputField, Pane, toaster } from "evergreen-ui";
 import { Button } from "antd";
 
@@ -9,7 +10,8 @@ export default class Home extends Component {
     err: "",
     token: "",
     isConnected: false,
-    uuid: ""
+    uuid: "",
+    redirect: false
   };
 
   _update(field, value) {
@@ -35,8 +37,8 @@ export default class Home extends Component {
       const { token } = res.meta;
       const { uuid } = res.data.user;
       const { user } = res.data;
-      this.setState({ token, isConnected: true, uuid });
-      this.props.handleUser(user);
+      this.setState({ token, isConnected: true, uuid, redirect: true });
+      this.props.handleUser(user, token);
     }
   }
 
@@ -73,6 +75,26 @@ export default class Home extends Component {
     );
   }
   render() {
-    return this._render();
+    const { nickname } = this.state;
+    if (!this.state.redirect) {
+      return this._render();
+    } else {
+      return (
+        <h1>Hello {nickname}</h1>
+        // <Route
+        //   path="/"
+        //   render={props => {
+        //     return (
+        //       <Redirect
+        //         to={{
+        //           pathname: "/profile",
+        //           state: { from: props.location }
+        //         }}
+        //       />
+        //     );
+        //   }}
+        // />
+      );
+    }
   }
 }

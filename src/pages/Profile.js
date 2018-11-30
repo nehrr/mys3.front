@@ -1,17 +1,21 @@
 import React, { Component } from "react";
+import jwt from "jsonwebtoken";
 import { Card, Button } from "antd";
-import { TextInput } from "evergreen-ui";
+import { TextInput, toaster } from "evergreen-ui";
 import "antd/dist/antd.css";
 
 export default class Profile extends Component {
   //profile
+  constructor(props) {
+    super(props);
 
-  state = {
-    nickname: "",
-    email: "",
-    password: "",
-    password_confirmation: ""
-  };
+    this.state = {
+      nickname: "",
+      email: "",
+      password: "",
+      password_confirmation: ""
+    };
+  }
 
   componentDidMount() {
     if (this.props.user) {
@@ -22,6 +26,41 @@ export default class Profile extends Component {
 
   _update(field, value) {
     this.setState({ [field]: value });
+  }
+
+  async _updateUser(user) {
+    let uuid, token;
+    const meta = JSON.parse(localStorage.getItem("myS3.app"));
+    if (meta) {
+      const decoded = jwt.decode(meta);
+      uuid = decoded.uuid;
+      token = meta;
+    }
+    const { nickname, email, password, password_confirmation } = this.state;
+    user = { nickname, email, password, password_confirmation };
+    if (user.password !== user.password_confirmation) {
+      this._err("Passwords don't match");
+    }
+
+    const data = await fetch(`http://localhost:5000/api/users/${uuid}/`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(user)
+    });
+
+    if (data.status === 400) {
+      const res = await data.json();
+      this._err(res.err.fields);
+    } else {
+      toaster.notify("Your profile was modified");
+    }
+  }
+
+  _err(err) {
+    toaster.warning(err);
   }
 
   render() {
@@ -39,7 +78,7 @@ export default class Profile extends Component {
           <Button
             type="primary"
             size="small"
-            onClick={() => console.log(this.state)}
+            onClick={() => this._updateUser(this.state)}
           >
             Edit
           </Button>
@@ -77,7 +116,7 @@ export default class Profile extends Component {
             name="text-input-password"
             placeholder="Password"
             onChange={e => {
-              console.log(e.target.value);
+              this._update("password", e.target.value);
             }}
           />
         </>
@@ -90,7 +129,7 @@ export default class Profile extends Component {
             name="text-input-password-confirmation"
             placeholder="Password Confirmation"
             onChange={e => {
-              console.log(e.target.value);
+              this._update("password_confirmation", e.target.value);
             }}
           />
         </>

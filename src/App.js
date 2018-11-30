@@ -1,5 +1,11 @@
 import React, { Component, Fragment } from "react";
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import jwt from "jsonwebtoken";
+import {
+  BrowserRouter as Router,
+  Route,
+  Link,
+  Redirect
+} from "react-router-dom";
 import { TabNavigation, Tab } from "evergreen-ui";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
@@ -14,15 +20,45 @@ const tab = [
 const tabCo = [
   { name: "Home", url: "/" },
   { name: "Dashboard", url: "/dashboard" },
-  { name: "Profile", url: "/profile" },
-  { name: "Logout", url: "/" }
+  { name: "Profile", url: "/profile" }
 ];
 
 class App extends Component {
-  state = {
-    isConnected: false,
-    nickname: "",
-    user: {}
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isConnected: false,
+      user: null
+    };
+
+    this.checkUser();
+  }
+
+  checkUser = () => {
+    const meta = JSON.parse(localStorage.getItem("myS3app"));
+    if (meta) {
+      const decoded = jwt.decode(meta.token);
+      console.log(decoded);
+      // JSON = CHECK WITH SERVER IF NO EXPIRATION
+      // this.handleUser(json.data.user, json.data.meta);
+    }
+  };
+
+  handleUser = (user, meta) => {
+    console.log("addstorage", meta);
+    localStorage.setItem("myS3.app", JSON.stringify(meta));
+    this.setState({ isConnected: true, user });
+  };
+
+  _logout = () => {
+    localStorage.removeItem("myS3.app");
+    this.setState({
+      isConnected: false,
+      user: null
+    });
+
+    return <Redirect to="/" />;
   };
 
   buckets = [
@@ -32,10 +68,6 @@ class App extends Component {
     { id: 4, name: "test4" },
     { id: 5, name: "test5" }
   ];
-
-  handleUser = user => {
-    this.setState({ isConnected: true, user });
-  };
 
   _menu = array => {
     const { user } = this.state;
@@ -49,6 +81,9 @@ class App extends Component {
                   <Link to={tab.url}> {tab.name}</Link>
                 </Tab>
               ))}
+              <Tab onSelect={this._logout}>
+                <Link to="#"> Logout</Link>
+              </Tab>
             </TabNavigation>
           </>
           <Route
@@ -77,7 +112,6 @@ class App extends Component {
   };
 
   render() {
-    console.log(this.state);
     const { isConnected } = this.state;
     if (!isConnected) {
       return this._menu(tab);

@@ -9,18 +9,6 @@ export default class Register extends Component {
       <Pane>
         <TextInputField
           width={320}
-          label="Firstname"
-          name="text-input-firstname"
-          placeholder="Firstname"
-        />
-        <TextInputField
-          width={320}
-          label="Lastname"
-          name="text-input-lastname"
-          placeholder="Lastname"
-        />
-        <TextInputField
-          width={320}
           label="Nickname"
           name="text-input-nickname"
           placeholder="Nickname"

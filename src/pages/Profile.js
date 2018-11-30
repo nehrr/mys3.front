@@ -26,28 +26,6 @@ export default class Profile extends Component {
         ]}
       >
         <p>
-          Firstname
-          <TextInputField
-            width={300}
-            name="text-input-firstname"
-            placeholder="Firstname"
-            onChange={e => {
-              console.log(e.target.value);
-            }}
-          />
-        </p>
-        <p>
-          Lastname
-          <TextInputField
-            width={300}
-            name="text-input-lastname"
-            placeholder="Lastname"
-            onChange={e => {
-              console.log(e.target.value);
-            }}
-          />
-        </p>
-        <p>
           Nickname
           <TextInputField
             width={300}

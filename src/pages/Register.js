@@ -27,6 +27,12 @@ export default class Register extends Component {
         />
         <TextInputField
           width={320}
+          label="Email"
+          name="text-input-email"
+          placeholder="Email"
+        />
+        <TextInputField
+          width={320}
           label="Age"
           name="text-input-age"
           placeholder="Age"

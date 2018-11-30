@@ -1,25 +1,31 @@
 import React, { Component } from "react";
 import { Card, Button } from "antd";
-import { TextInputField } from "evergreen-ui";
+import { TextInput } from "evergreen-ui";
 import "antd/dist/antd.css";
 
 export default class Profile extends Component {
   //profile
 
   state = {
-    nickname: "Shepard",
-    email: "a@a.fr",
-    age: "39",
+    nickname: "",
+    email: "",
     password: "",
     password_confirmation: ""
   };
+
+  componentDidMount() {
+    if (this.props.user) {
+      const { nickname, email } = this.props.user;
+      this.setState({ nickname, email });
+    }
+  }
 
   _update(field, value) {
     this.setState({ [field]: value });
   }
 
   render() {
-    const { nickname, email, age } = this.state;
+    const { nickname, email } = this.state;
     return (
       <Card
         style={{ width: 360 }}
@@ -39,9 +45,9 @@ export default class Profile extends Component {
           </Button>
         ]}
       >
-        <p>
+        <>
           Nickname
-          <TextInputField
+          <TextInput
             width={300}
             name="text-input-nickname"
             placeholder={nickname}
@@ -49,10 +55,11 @@ export default class Profile extends Component {
               this._update("nickname", e.target.value);
             }}
           />
-        </p>
-        <p>
+        </>
+
+        <>
           Email
-          <TextInputField
+          <TextInput
             width={300}
             name="text-input-email"
             placeholder={email}
@@ -60,10 +67,11 @@ export default class Profile extends Component {
               this._update("email", e.target.value);
             }}
           />
-        </p>
-        <p>
+        </>
+
+        <>
           Password
-          <TextInputField
+          <TextInput
             width={300}
             type="password"
             name="text-input-password"
@@ -72,10 +80,11 @@ export default class Profile extends Component {
               console.log(e.target.value);
             }}
           />
-        </p>
-        <p>
+        </>
+
+        <>
           Password Confirmation
-          <TextInputField
+          <TextInput
             width={300}
             type="password"
             name="text-input-password-confirmation"
@@ -84,7 +93,7 @@ export default class Profile extends Component {
               console.log(e.target.value);
             }}
           />
-        </p>
+        </>
       </Card>
     );
   }

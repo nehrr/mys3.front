@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Card, Button } from "antd";
-import { TextInputField } from "evergreen-ui";
+import { TextInput } from "evergreen-ui";
 import "antd/dist/antd.css";
 
 export default class Profile extends Component {
@@ -41,7 +41,7 @@ export default class Profile extends Component {
       >
         <p>
           Nickname
-          <TextInputField
+          <TextInput
             width={300}
             name="text-input-nickname"
             placeholder={nickname}
@@ -52,7 +52,7 @@ export default class Profile extends Component {
         </p>
         <p>
           Email
-          <TextInputField
+          <TextInput
             width={300}
             name="text-input-email"
             placeholder={email}

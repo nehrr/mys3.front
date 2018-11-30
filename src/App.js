@@ -21,7 +21,8 @@ const tabCo = [
 class App extends Component {
   state = {
     isConnected: false,
-    name: ""
+    nickname: "",
+    user: {}
   };
 
   buckets = [
@@ -32,12 +33,16 @@ class App extends Component {
     { id: 5, name: "test5" }
   ];
 
+  handleUser = user => {
+    this.setState({ isConnected: true, user });
+  };
+
   _menu = array => {
-    const { isConnected, name } = this.state;
+    const { user } = this.state;
     return (
       <Router>
         <Fragment>
-          <div>
+          <>
             <TabNavigation>
               {array.map((tab, index) => (
                 <Tab key={tab.name} href={tab.url} id={tab.name}>
@@ -45,26 +50,34 @@ class App extends Component {
                 </Tab>
               ))}
             </TabNavigation>
-          </div>
+          </>
           <Route
             exact
             path="/"
-            render={props => (
-              <Home {...props} isConnected={isConnected} name={name} />
-            )}
+            render={props => <Home {...props} handleUser={this.handleUser} />}
           />
           <Route path="/register" component={Register} />
           <Route
             path="/dashboard"
-            render={props => <Dashboard {...props} buckets={this.buckets} />}
+            render={props => (
+              <Dashboard
+                {...props}
+                buckets={this.buckets}
+                nickname={props.nickname}
+              />
+            )}
           />
-          <Route path="/profile" component={Profile} />
+          <Route
+            path="/profile"
+            render={props => <Profile {...props} user={user} />}
+          />
         </Fragment>
       </Router>
     );
   };
 
   render() {
+    console.log(this.state);
     const { isConnected } = this.state;
     if (!isConnected) {
       return this._menu(tab);

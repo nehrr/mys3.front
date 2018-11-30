@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import { Table } from "evergreen-ui";
-import Bucket from "../components/Bucket";
 
 export default class Dashboard extends Component {
   buckets = this.props.buckets;
   //arbo
   render() {
+    console.log(this.props);
     return (
       <Table>
         <Table.Head>

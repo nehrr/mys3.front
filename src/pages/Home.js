@@ -28,60 +28,49 @@ export default class Home extends Component {
     });
 
     const res = await data.json();
-    // let err = res.err ? res.err.fields : null;
+
     if (res.err) {
-      this.setState({ err: res.err.description });
+      this._err(res.err.description);
     } else {
       const { token } = res.meta;
       const { uuid } = res.data.user;
+      const { user } = res.data;
       this.setState({ token, isConnected: true, uuid });
-      console.log(this.state);
+      this.props.handleUser(user);
     }
   }
 
-  _err() {
-    const { err } = this.state;
+  _err(err) {
     toaster.warning(err);
   }
 
   _render() {
-    if (!this.state.isConnected) {
-      const { err } = this.state;
-      return (
-        <Pane>
-          <TextInputField
-            width={320}
-            label="Nickname"
-            name="text-input-nickname"
-            placeholder="Nickname"
-            onChange={e => this._update("nickname", e.target.value)}
-          />
-          <TextInputField
-            width={320}
-            label="Password"
-            type="password"
-            name="text-input-password"
-            placeholder="Password"
-            onChange={e => this._update("password", e.target.value)}
-          />
-          <Button
-            type="primary"
-            size="small"
-            onClick={() => this._login(this.state)}
-          >
-            Login
-          </Button>
-          {/* {err ? this._err() : null} */}
-        </Pane>
-      );
-    } else {
-      const { nickname } = this.state;
-      return (
-        <Pane>
-          <h1>Hello {nickname}</h1>
-        </Pane>
-      );
-    }
+    return (
+      <Pane>
+        <TextInputField
+          width={320}
+          label="Nickname"
+          name="text-input-nickname"
+          placeholder="Nickname"
+          onChange={e => this._update("nickname", e.target.value)}
+        />
+        <TextInputField
+          width={320}
+          label="Password"
+          type="password"
+          name="text-input-password"
+          placeholder="Password"
+          onChange={e => this._update("password", e.target.value)}
+        />
+        <Button
+          type="primary"
+          size="small"
+          onClick={() => this._login(this.state)}
+        >
+          Login
+        </Button>
+      </Pane>
+    );
   }
   render() {
     return this._render();

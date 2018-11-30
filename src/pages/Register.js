@@ -29,9 +29,9 @@ export default class Register extends Component {
     });
 
     const res = await data.json();
-    let err = res.err ? res.err.fields : null;
-    if (err) {
-      this.setState({ err });
+
+    if (res.err) {
+      this._err(res.err.fields);
     }
   }
 
@@ -48,13 +48,11 @@ export default class Register extends Component {
     data = await data.json();
   }
 
-  _err() {
-    const { err } = this.state;
+  _err(err) {
     toaster.warning(err);
   }
 
   _form() {
-    const { err } = this.state;
     return (
       <Pane>
         <TextInputField
@@ -102,7 +100,6 @@ export default class Register extends Component {
         >
           Register
         </Button>
-        {/* {err ? this._err() : null} */}
       </Pane>
     );
   }

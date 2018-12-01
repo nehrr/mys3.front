@@ -1,4 +1,5 @@
-import React, { Component } from "react";
+import React, { Component, Image } from "react";
+import fs from "fs";
 import jwt from "jsonwebtoken";
 import {
   Table,
@@ -7,8 +8,7 @@ import {
   toaster,
   Dialog,
   SideSheet,
-  Paragraph,
-  FilePicker
+  Paragraph
 } from "evergreen-ui";
 
 export default class Dashboard extends Component {
@@ -258,6 +258,44 @@ export default class Dashboard extends Component {
     this.setState({ isShownEditBlob: false, id: null });
   }
 
+  async _downloadBlob(id) {
+    let uuid, token;
+    const { bucket } = this.state;
+    const meta = JSON.parse(localStorage.getItem("myS3.app"));
+    if (meta) {
+      const decoded = jwt.decode(meta);
+      uuid = decoded.uuid;
+      token = meta;
+    }
+
+    let data = await fetch(
+      `http://localhost:5000/api/users/${uuid}/buckets/${bucket}/blobs/${id}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    data = await data.blob();
+    const url = URL.createObjectURL(data);
+
+    this.download("myFile", url);
+  }
+
+  download(filename, image) {
+    var element = document.createElement("a");
+    element.setAttribute("href", image);
+    element.setAttribute("download", filename);
+
+    element.style.display = "none";
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+  }
+
   _renderBlobs(id) {
     const { blobs } = this.state;
     return (
@@ -270,14 +308,17 @@ export default class Dashboard extends Component {
           {blobs.map(blob => {
             const { name, id } = blob;
             return (
-              <Table.Row
-                key={id}
-                isSelectable
-                onSelect={() => {
-                  this.setState({ isShownBlobs: true, id });
-                }}
-              >
+              <Table.Row key={id}>
                 <Table.TextCell>{name}</Table.TextCell>
+                <Table.TextCell>
+                  <Button
+                    onClick={() => {
+                      this._downloadBlob(id);
+                    }}
+                  >
+                    Download
+                  </Button>
+                </Table.TextCell>
                 <Table.TextCell>
                   <Button
                     onClick={() => {

@@ -37,6 +37,7 @@ export default class Home extends Component {
       const { token } = res.meta;
       const { uuid } = res.data.user;
       const { user } = res.data;
+      console.log(token);
       this.setState({ token, isConnected: true, uuid, redirect: true });
       this.props.handleUser(user, token);
     }
@@ -79,22 +80,7 @@ export default class Home extends Component {
     if (!this.state.redirect) {
       return this._render();
     } else {
-      return (
-        <h1>Hello {nickname}</h1>
-        // <Route
-        //   path="/"
-        //   render={props => {
-        //     return (
-        //       <Redirect
-        //         to={{
-        //           pathname: "/profile",
-        //           state: { from: props.location }
-        //         }}
-        //       />
-        //     );
-        //   }}
-        // />
-      );
+      return <h1>Hello {nickname}</h1>;
     }
   }
 }

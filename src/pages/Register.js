@@ -32,20 +32,9 @@ export default class Register extends Component {
 
     if (res.err) {
       this._err(res.err.fields);
+    } else {
+      toaster.notify("You were registered");
     }
-  }
-
-  async _test() {
-    let uuid = "64aa2180-9880-4cb4-b04c-c721f460ba5b";
-    let token =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1dWlkIjoiNjRhYTIxODAtOTg4MC00Y2I0LWIwNGMtYzcyMWY0NjBiYTViIiwibmlja25hbWUiOiJKYWNrIiwiZW1haWwiOiJqYWNrQGNpdGFkZWwuaG0iLCJpYXQiOjE1NDM1NzUxNTJ9.zKpNrLLcHNxfhrxamJCUnxGYwvXlwblE0GclxFaE2jA";
-    let data = await fetch(`http://localhost:5000/api/users/${uuid}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    data = await data.json();
   }
 
   _err(err) {

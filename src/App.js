@@ -6,7 +6,7 @@ import {
   Link,
   Redirect
 } from "react-router-dom";
-import { TabNavigation, Tab } from "evergreen-ui";
+import { TabNavigation, Tab, toaster } from "evergreen-ui";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Register from "./pages/Register";
@@ -35,11 +35,28 @@ class App extends Component {
     this.checkUser();
   }
 
-  checkUser = () => {
-    const meta = JSON.parse(localStorage.getItem("myS3app"));
+  checkUser = async () => {
+    const meta = JSON.parse(localStorage.getItem("myS3.app"));
     if (meta) {
-      const decoded = jwt.decode(meta.token);
-      console.log(decoded);
+      const decoded = jwt.decode(meta);
+      const uuid = decoded.uuid;
+      const token = decoded;
+
+      const data = await fetch(`http://localhost:5000/api/users/${uuid}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      // if (data.status === 401) {
+      //   toaster.danger("Your session has expired, please login again");
+      // } else {
+      //   toaster.notify("beep");
+      //   // this.props.handleUser(user, token);
+      // }
+
       // JSON = CHECK WITH SERVER IF NO EXPIRATION
       // this.handleUser(json.data.user, json.data.meta);
     }
@@ -97,8 +114,8 @@ class App extends Component {
             render={props => (
               <Dashboard
                 {...props}
-                buckets={this.buckets}
-                nickname={props.nickname}
+                // buckets={this.buckets}
+                // nickname={props.nickname}
               />
             )}
           />

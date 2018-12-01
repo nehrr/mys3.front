@@ -13,7 +13,7 @@ import {
 
 export default class Dashboard extends Component {
   //arbo
-  state = { bucket: "", isLoading: true, isShown: false, myFile: null };
+  state = { bucket: "", isLoading: true, myFile: null };
 
   _update(field, value) {
     this.setState({ [field]: value });
@@ -148,7 +148,6 @@ export default class Dashboard extends Component {
       {
         method: "DELETE",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         }
       }
@@ -196,12 +195,70 @@ export default class Dashboard extends Component {
     } else {
       toaster.notify("Your blob was added");
       const blobs = await this._fetchBlobs(bucket);
-      this.setState({ blobs });
     }
   }
 
+  async _deleteBlob() {
+    let uuid, token;
+    const { bucket, id } = this.state;
+    const meta = JSON.parse(localStorage.getItem("myS3.app"));
+    if (meta) {
+      const decoded = jwt.decode(meta);
+      uuid = decoded.uuid;
+      token = meta;
+    }
+    const data = await fetch(
+      `http://localhost:5000/api/users/${uuid}/buckets/${bucket}/blobs/${id}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (data.status === 400) {
+      this._err("Uh oh, something went wrong");
+    } else {
+      toaster.notify("Your blob was deleted");
+      const blobs = await this._fetchBlobs(bucket);
+    }
+
+    this.setState({ isShownDeleteBlob: false, id: null });
+  }
+
+  async _updateBlob(name) {
+    let uuid, token;
+    const { bucket, id } = this.state;
+    const meta = JSON.parse(localStorage.getItem("myS3.app"));
+    if (meta) {
+      const decoded = jwt.decode(meta);
+      uuid = decoded.uuid;
+      token = meta;
+    }
+    const data = await fetch(
+      `http://localhost:5000/api/users/${uuid}/buckets/${bucket}/blobs/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ name })
+      }
+    );
+
+    if (data.status === 400) {
+      this._err("Uh oh, something went wrong");
+    } else {
+      toaster.notify("Your blob was updated");
+      const blobs = await this._fetchBlobs(bucket);
+    }
+
+    this.setState({ isShownEditBlob: false, id: null });
+  }
+
   _renderBlobs(id) {
-    // this._fetchBlobs(id);
     const { blobs } = this.state;
     return (
       <Table>
@@ -224,7 +281,7 @@ export default class Dashboard extends Component {
                 <Table.TextCell>
                   <Button
                     onClick={() => {
-                      this.setState({ isShownEdit: true, id });
+                      this.setState({ isShownEditBlob: true, id });
                     }}
                   >
                     Edit
@@ -233,7 +290,7 @@ export default class Dashboard extends Component {
                 <Table.TextCell>
                   <Button
                     onClick={() => {
-                      this.setState({ isShownDelete: true, id });
+                      this.setState({ isShownDeleteBlob: true, id });
                     }}
                   >
                     Delete
@@ -254,7 +311,7 @@ export default class Dashboard extends Component {
   };
 
   _renderTable() {
-    const { buckets, bucket, blobs } = this.state;
+    const { buckets, bucket, blobs, blob } = this.state;
     return (
       <>
         <Dialog
@@ -286,6 +343,36 @@ export default class Dashboard extends Component {
           }}
         >
           Are you sure you want to delete this bucket ?
+        </Dialog>
+        <Dialog
+          isShown={this.state.isShownDeleteBlob}
+          title="Delete your blob"
+          intent="danger"
+          onCloseComplete={() => this.setState({ isShownDeleteBlob: false })}
+          confirmLabel="Confirm"
+          onConfirm={() => {
+            this._deleteBlob();
+          }}
+        >
+          Are you sure you want to delete this blob ?
+        </Dialog>
+        <Dialog
+          isShown={this.state.isShownEditBlob}
+          title="Edit your blob"
+          onCloseComplete={() => this.setState({ isShownEditBlob: false })}
+          confirmLabel="Confirm"
+          onConfirm={() => {
+            this._updateBlob(blob);
+          }}
+        >
+          <TextInput
+            width={300}
+            name="text-input-blob-name"
+            placeholder="Name"
+            onChange={e => {
+              this._update("blob", e.target.value);
+            }}
+          />
         </Dialog>
         <SideSheet
           isShown={this.state.isShownBlobs}
@@ -327,15 +414,16 @@ export default class Dashboard extends Component {
             {buckets.map(bucket => {
               const { name, id } = bucket;
               return (
-                <Table.Row
-                  key={id}
-                  isSelectable
-                  onSelect={() => {
-                    this.setState({ isShownBlobs: true, bucket: id });
-                    this._fetchBlobs(id);
-                  }}
-                >
-                  <Table.TextCell>{name}</Table.TextCell>
+                <Table.Row key={id}>
+                  <Table.TextCell
+                    isSelectable
+                    onClick={() => {
+                      this.setState({ isShownBlobs: true, bucket: id });
+                      this._fetchBlobs(id);
+                    }}
+                  >
+                    {name}
+                  </Table.TextCell>
                   <Table.TextCell>
                     <Button
                       onClick={() => {

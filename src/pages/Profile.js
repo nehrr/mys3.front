@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import jwt from "jsonwebtoken";
 import { Card, Button } from "antd";
-import { TextInput, toaster } from "evergreen-ui";
+import { TextInput, toaster, Dialog } from "evergreen-ui";
 import "antd/dist/antd.css";
 
 export default class Profile extends Component {
@@ -13,8 +13,7 @@ export default class Profile extends Component {
       nickname: "",
       email: "",
       password: "",
-      password_confirmation: "",
-      isConnected: false
+      password_confirmation: ""
     };
   }
 
@@ -64,77 +63,116 @@ export default class Profile extends Component {
     toaster.warning(err);
   }
 
+  async _deleteUser() {
+    let uuid, token;
+    const meta = JSON.parse(localStorage.getItem("myS3.app"));
+    if (meta) {
+      const decoded = jwt.decode(meta);
+      uuid = decoded.uuid;
+      token = meta;
+    }
+    const data = await fetch(`http://localhost:5000/api/users/${uuid}/`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (data.status === 400) {
+      this._err("Uh oh, something went wrong");
+    } else {
+      toaster.notify("Goodbye");
+      window.location.href = "/";
+    }
+  }
+
   render() {
     const { nickname, email } = this.state;
     return (
-      <Card
-        style={{ width: 360 }}
-        cover={
-          <img
-            alt="example"
-            src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
-          />
-        }
-        actions={[
-          <Button
-            type="primary"
-            size="small"
-            onClick={() => this._updateUser(this.state)}
-          >
-            Edit
-          </Button>
-        ]}
-      >
-        <>
-          Nickname
-          <TextInput
-            width={300}
-            name="text-input-nickname"
-            placeholder={nickname}
-            onChange={e => {
-              this._update("nickname", e.target.value);
-            }}
-          />
-        </>
+      <>
+        <Dialog
+          isShown={this.state.isShownDelete}
+          title="Delete your blob"
+          intent="danger"
+          onCloseComplete={() => this.setState({ isShownDeleteBlob: false })}
+          confirmLabel="Confirm"
+          onConfirm={() => {
+            this._deleteUser();
+          }}
+        >
+          Are you sure you want to delete your account ?
+        </Dialog>
+        <Card
+          style={{ width: 360 }}
+          cover={
+            <img
+              alt="example"
+              src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
+            />
+          }
+          actions={[
+            <Button type="primary" onClick={() => this._updateUser(this.state)}>
+              Edit
+            </Button>,
+            <Button
+              type="danger"
+              onClick={() => this.setState({ isShownDelete: true })}
+            >
+              Delete your account
+            </Button>
+          ]}
+        >
+          <>
+            Nickname
+            <TextInput
+              width={300}
+              name="text-input-nickname"
+              placeholder={nickname}
+              onChange={e => {
+                this._update("nickname", e.target.value);
+              }}
+            />
+          </>
 
-        <>
-          Email
-          <TextInput
-            width={300}
-            name="text-input-email"
-            placeholder={email}
-            onChange={e => {
-              this._update("email", e.target.value);
-            }}
-          />
-        </>
+          <>
+            Email
+            <TextInput
+              width={300}
+              name="text-input-email"
+              placeholder={email}
+              onChange={e => {
+                this._update("email", e.target.value);
+              }}
+            />
+          </>
 
-        <>
-          Password
-          <TextInput
-            width={300}
-            type="password"
-            name="text-input-password"
-            placeholder="Password"
-            onChange={e => {
-              this._update("password", e.target.value);
-            }}
-          />
-        </>
+          <>
+            Password
+            <TextInput
+              width={300}
+              type="password"
+              name="text-input-password"
+              placeholder="Password"
+              onChange={e => {
+                this._update("password", e.target.value);
+              }}
+            />
+          </>
 
-        <>
-          Password Confirmation
-          <TextInput
-            width={300}
-            type="password"
-            name="text-input-password-confirmation"
-            placeholder="Password Confirmation"
-            onChange={e => {
-              this._update("password_confirmation", e.target.value);
-            }}
-          />
-        </>
-      </Card>
+          <>
+            Password Confirmation
+            <TextInput
+              width={300}
+              type="password"
+              name="text-input-password-confirmation"
+              placeholder="Password Confirmation"
+              onChange={e => {
+                this._update("password_confirmation", e.target.value);
+              }}
+            />
+          </>
+        </Card>
+      </>
     );
   }
 }

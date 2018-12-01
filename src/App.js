@@ -7,6 +7,7 @@ import {
   Redirect
 } from "react-router-dom";
 import { TabNavigation, Tab, toaster } from "evergreen-ui";
+import "./App.css";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Register from "./pages/Register";
@@ -28,7 +29,6 @@ class App extends Component {
     super(props);
 
     this.state = {
-      isConnected: false,
       user: null
     };
 
@@ -40,22 +40,22 @@ class App extends Component {
     if (meta) {
       const decoded = jwt.decode(meta);
       const uuid = decoded.uuid;
-      const token = decoded;
+      const token = meta;
+      const user = decoded;
 
       const data = await fetch(`http://localhost:5000/api/users/${uuid}`, {
-        method: "POST",
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         }
       });
 
-      // if (data.status === 401) {
-      //   toaster.danger("Your session has expired, please login again");
-      // } else {
-      //   toaster.notify("beep");
-      //   // this.props.handleUser(user, token);
-      // }
+      if (data.status === 401) {
+        toaster.danger("Your session has expired, please login again");
+      } else {
+        this.handleUser(user, token);
+      }
 
       // JSON = CHECK WITH SERVER IF NO EXPIRATION
       // this.handleUser(json.data.user, json.data.meta);
@@ -90,7 +90,7 @@ class App extends Component {
                 </Tab>
               ))}
               <Tab onSelect={this._logout}>
-                <Link to="#"> Logout</Link>
+                <Link to="/">Logout</Link>
               </Tab>
             </TabNavigation>
           </>
@@ -112,10 +112,11 @@ class App extends Component {
 
   render() {
     const { isConnected } = this.state;
+
     if (!isConnected) {
-      return this._menu(tab);
+      return <div className="App"> {this._menu(tab)} </div>;
     } else {
-      return this._menu(tabCo);
+      return <div className="App"> {this._menu(tabCo)} </div>;
     }
   }
 }

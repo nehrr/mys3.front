@@ -1,16 +1,9 @@
 import React, { Component } from "react";
-import { Redirect, Route } from "react-router-dom";
-import { TextInputField, Pane, toaster } from "evergreen-ui";
+import { TextInputField, toaster } from "evergreen-ui";
 import { Button } from "antd";
 
 export default class Home extends Component {
   state = {
-    nickname: "",
-    password: "",
-    err: "",
-    token: "",
-    isConnected: false,
-    uuid: "",
     redirect: false
   };
 
@@ -48,7 +41,7 @@ export default class Home extends Component {
 
   _render() {
     return (
-      <Pane>
+      <>
         <TextInputField
           width={320}
           label="Nickname"
@@ -71,13 +64,13 @@ export default class Home extends Component {
         >
           Login
         </Button>
-      </Pane>
+      </>
     );
   }
 
   render() {
-    const { nickname } = this.state;
-    if (!this.state.redirect) {
+    const { nickname, redirect } = this.state;
+    if (!redirect) {
       return this._render();
     } else {
       return <h1>Hello {nickname}</h1>;

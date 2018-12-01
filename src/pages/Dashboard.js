@@ -1,5 +1,5 @@
-import React, { Component, Image } from "react";
-import fs from "fs";
+import React, { Component } from "react";
+
 import jwt from "jsonwebtoken";
 import {
   Table,
@@ -508,11 +508,7 @@ export default class Dashboard extends Component {
               this._update("bucket", e.target.value);
             }}
           />
-          <Button
-            type="primary"
-            size="small"
-            onClick={() => this._addBucket(bucket)}
-          >
+          <Button type="primary" onClick={() => this._addBucket(bucket)}>
             Add bucket
           </Button>
           {buckets ? this._renderTable() : null}

@@ -63,7 +63,6 @@ class App extends Component {
   };
 
   handleUser = (user, meta) => {
-    console.log("addstorage", meta);
     localStorage.setItem("myS3.app", JSON.stringify(meta));
     this.setState({ isConnected: true, user });
   };
@@ -77,14 +76,6 @@ class App extends Component {
 
     return <Redirect to="/" />;
   };
-
-  buckets = [
-    { id: 1, name: "test1" },
-    { id: 2, name: "test2" },
-    { id: 3, name: "test3" },
-    { id: 4, name: "test4" },
-    { id: 5, name: "test5" }
-  ];
 
   _menu = array => {
     const { user } = this.state;
@@ -109,16 +100,7 @@ class App extends Component {
             render={props => <Home {...props} handleUser={this.handleUser} />}
           />
           <Route path="/register" component={Register} />
-          <Route
-            path="/dashboard"
-            render={props => (
-              <Dashboard
-                {...props}
-                // buckets={this.buckets}
-                // nickname={props.nickname}
-              />
-            )}
-          />
+          <Route path="/dashboard" render={props => <Dashboard {...props} />} />
           <Route
             path="/profile"
             render={props => <Profile {...props} user={user} />}

@@ -37,7 +37,6 @@ export default class Home extends Component {
       const { token } = res.meta;
       const { uuid } = res.data.user;
       const { user } = res.data;
-      console.log(token);
       this.setState({ token, isConnected: true, uuid, redirect: true });
       this.props.handleUser(user, token);
     }
@@ -75,6 +74,7 @@ export default class Home extends Component {
       </Pane>
     );
   }
+
   render() {
     const { nickname } = this.state;
     if (!this.state.redirect) {

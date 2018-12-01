@@ -71,7 +71,6 @@ export default class Dashboard extends Component {
   async _updateBucket(name) {
     let uuid, token;
     const { id } = this.state;
-    console.log(name, this.state.id);
     const meta = JSON.parse(localStorage.getItem("myS3.app"));
     if (meta) {
       const decoded = jwt.decode(meta);
@@ -98,30 +97,38 @@ export default class Dashboard extends Component {
       this.setState({ buckets });
     }
 
-    this.setState({ id: null });
+    this.setState({ isShownEdit: false, id: null });
   }
 
-  _openDialog() {
-    console.log(this.state);
-    this.setState({ isShown: true });
-    return (
-      <Dialog
-        isShown={this.state.isShow}
-        title="Dialog title"
-        onCloseComplete={() => this.setState({ isShown: false })}
-        confirmLabel="Custom Label"
-      >
-        Rename your bucket
-        <TextInput
-          width={300}
-          name="text-input-bucket-name"
-          placeholder="Name"
-          onChange={e => {
-            this._update("bucket", e.target.value);
-          }}
-        />
-      </Dialog>
+  async _deleteBucket() {
+    let uuid, token;
+    const { id } = this.state;
+    const meta = JSON.parse(localStorage.getItem("myS3.app"));
+    if (meta) {
+      const decoded = jwt.decode(meta);
+      uuid = decoded.uuid;
+      token = meta;
+    }
+    const data = await fetch(
+      `http://localhost:5000/api/users/${uuid}/buckets/${id}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      }
     );
+
+    if (data.status === 400) {
+      this._err("Uh oh, something went wrong");
+    } else {
+      toaster.notify("Your bucket was deleted");
+      const buckets = await this._fetchBuckets();
+      this.setState({ buckets });
+    }
+
+    this.setState({ isShownDelete: false, id: null });
   }
 
   _renderTable() {
@@ -129,9 +136,9 @@ export default class Dashboard extends Component {
     return (
       <>
         <Dialog
-          isShown={this.state.isShown}
+          isShown={this.state.isShownEdit}
           title="Rename your bucket"
-          onCloseComplete={() => this.setState({ isShown: false })}
+          onCloseComplete={() => this.setState({ isShownEdit: false })}
           confirmLabel="Confirm"
           onConfirm={() => {
             this._updateBucket(bucket);
@@ -146,27 +153,47 @@ export default class Dashboard extends Component {
             }}
           />
         </Dialog>
+        <Dialog
+          isShown={this.state.isShownDelete}
+          title="Delete your bucket"
+          intent="danger"
+          onCloseComplete={() => this.setState({ isShownDelete: false })}
+          confirmLabel="Confirm"
+          onConfirm={() => {
+            this._deleteBucket();
+          }}
+        >
+          Are you sure you want to delete this bucket ?
+        </Dialog>
         <Table>
           <Table.Head>
             <Table.TextHeaderCell>Bucket name</Table.TextHeaderCell>
+            <Table.TextHeaderCell>Actions</Table.TextHeaderCell>
           </Table.Head>
           <Table.Body height={240}>
             {buckets.map(bucket => {
               const { name, id } = bucket;
               return (
                 <Table.Row key={id}>
-                  <Table.TextCell>{id}</Table.TextCell>
                   <Table.TextCell>{name}</Table.TextCell>
                   <Table.TextCell>
                     <Button
                       onClick={() => {
-                        this.setState({ isShown: true, id });
+                        this.setState({ isShownEdit: true, id });
                       }}
                     >
                       Edit
                     </Button>
                   </Table.TextCell>
-                  <Table.TextCell>Delete</Table.TextCell>
+                  <Table.TextCell>
+                    <Button
+                      onClick={() => {
+                        this.setState({ isShownDelete: true, id });
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </Table.TextCell>
                 </Table.Row>
               );
             })}

@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from "react";
 import { TextInputField, toaster } from "evergreen-ui";
 
-import { Button } from "antd";
+import { Button, Card } from "antd";
 
 const centered = {
   textAlign: "center"
@@ -48,10 +48,9 @@ export default class Register extends Component {
 
   _form() {
     return (
-      <div style={centered}>
+      <Card>
         <TextInputField
           width={320}
-          style={centered}
           label="Nickname"
           name="text-input-nickname"
           placeholder="Nickname"
@@ -95,7 +94,7 @@ export default class Register extends Component {
         >
           Register
         </Button>
-      </div>
+      </Card>
     );
   }
 

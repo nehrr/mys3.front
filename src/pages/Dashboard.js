@@ -4,11 +4,11 @@ import jwt from "jsonwebtoken";
 import {
   Table,
   TextInput,
-  Button,
   toaster,
   Dialog,
   SideSheet,
-  Paragraph
+  Card,
+  Icon
 } from "evergreen-ui";
 
 export default class Dashboard extends Component {
@@ -40,7 +40,8 @@ export default class Dashboard extends Component {
     );
 
     if (data.status === 400) {
-      this._err("Uh oh, something went wrong");
+      const res = await data.json();
+      this._err(res.err.fields);
     } else {
       toaster.notify("Your bucket was added");
       const buckets = await this._fetchBuckets();
@@ -124,7 +125,8 @@ export default class Dashboard extends Component {
     );
 
     if (data.status === 400) {
-      this._err("Uh oh, something went wrong");
+      const res = await data.json();
+      this._err(res.err.fields);
     } else {
       toaster.notify("Your bucket was updated");
       const buckets = await this._fetchBuckets();
@@ -154,7 +156,8 @@ export default class Dashboard extends Component {
     );
 
     if (data.status === 400) {
-      this._err("Uh oh, something went wrong");
+      const res = await data.json();
+      this._err(res.err.fields);
     } else {
       toaster.notify("Your bucket was deleted");
       const buckets = await this._fetchBuckets();
@@ -191,7 +194,8 @@ export default class Dashboard extends Component {
     );
 
     if (data.status === 400) {
-      this._err("Uh oh, something went wrong");
+      const res = await data.json();
+      this._err(res.err.fields);
     } else {
       toaster.notify("Your blob was added");
       const blobs = await this._fetchBlobs(bucket);
@@ -218,7 +222,8 @@ export default class Dashboard extends Component {
     );
 
     if (data.status === 400) {
-      this._err("Uh oh, something went wrong");
+      const res = await data.json();
+      this._err(res.err.fields);
     } else {
       toaster.notify("Your blob was deleted");
       const blobs = await this._fetchBlobs(bucket);
@@ -249,7 +254,8 @@ export default class Dashboard extends Component {
     );
 
     if (data.status === 400) {
-      this._err("Uh oh, something went wrong");
+      const res = await data.json();
+      this._err(res.err.fields);
     } else {
       toaster.notify("Your blob was updated");
       const blobs = await this._fetchBlobs(bucket);
@@ -304,38 +310,67 @@ export default class Dashboard extends Component {
           <Table.TextHeaderCell>Blob name</Table.TextHeaderCell>
           <Table.TextHeaderCell>Actions</Table.TextHeaderCell>
         </Table.Head>
-        <Table.Body height={240}>
+        <Table.Body>
+          <Table.Row>
+            <Table.TextCell>
+              <TextInput
+                width={150}
+                name="text-input-blob-name"
+                placeholder="Name"
+                onChange={e => {
+                  this._update("blob", e.target.value);
+                }}
+              />
+            </Table.TextCell>
+
+            <Table.TextCell>
+              <input type="file" onChange={this._handleselectedFile} />
+            </Table.TextCell>
+            <Table.TextCell>
+              <Icon
+                icon="add"
+                color="green"
+                size={20}
+                onClick={() => {
+                  this._uploadBlob();
+                }}
+              />
+            </Table.TextCell>
+          </Table.Row>
           {blobs.map(blob => {
             const { name, id } = blob;
             return (
               <Table.Row key={id}>
                 <Table.TextCell>{name}</Table.TextCell>
+                <Table.TextCell />
                 <Table.TextCell>
-                  <Button
+                  <Icon
+                    icon="download"
+                    size={20}
                     onClick={() => {
                       this._downloadBlob(id);
                     }}
-                  >
-                    Download
-                  </Button>
+                  />
                 </Table.TextCell>
                 <Table.TextCell>
-                  <Button
+                  <Icon
+                    icon="edit"
+                    color="blue"
+                    size={20}
                     onClick={() => {
                       this.setState({ isShownEditBlob: true, id });
                     }}
-                  >
-                    Edit
-                  </Button>
+                  />
                 </Table.TextCell>
                 <Table.TextCell>
-                  <Button
+                  <Icon
+                    icon="delete"
+                    color="red"
+                    size={20}
                     onClick={() => {
                       this.setState({ isShownDeleteBlob: true, id });
                     }}
-                  >
-                    Delete
-                  </Button>
+                  />
                 </Table.TextCell>
               </Table.Row>
             );
@@ -352,7 +387,7 @@ export default class Dashboard extends Component {
   };
 
   _renderTable() {
-    const { buckets, bucket, blobs, blob } = this.state;
+    const { buckets, bucket, blobs, blob, bucket_name } = this.state;
     return (
       <>
         <Dialog
@@ -419,30 +454,7 @@ export default class Dashboard extends Component {
           isShown={this.state.isShownBlobs}
           onCloseComplete={() => this.setState({ isShownBlobs: false })}
         >
-          <Paragraph margin={40}>Blobs</Paragraph>
-
-          <TextInput
-            width={300}
-            name="text-input-blob-name"
-            placeholder="Name"
-            onChange={e => {
-              this._update("blob", e.target.value);
-            }}
-          />
-
-          <input
-            type="file"
-            name=""
-            id=""
-            onChange={this._handleselectedFile}
-          />
-          <Button
-            onClick={() => {
-              this._uploadBlob();
-            }}
-          >
-            Upload
-          </Button>
+          <h1 style={{ margin: 40 }}>Bucket {bucket_name}</h1>
 
           {blobs ? this._renderBlobs() : null}
         </SideSheet>
@@ -451,7 +463,27 @@ export default class Dashboard extends Component {
             <Table.TextHeaderCell>Bucket name</Table.TextHeaderCell>
             <Table.TextHeaderCell>Actions</Table.TextHeaderCell>
           </Table.Head>
-          <Table.Body height={240}>
+          <Table.Body>
+            <Table.Row>
+              <Table.TextCell>
+                <TextInput
+                  style={{ textAlign: "center" }}
+                  name="text-input-nickname"
+                  placeholder="Choose a name"
+                  onChange={e => {
+                    this._update("bucket", e.target.value);
+                  }}
+                />
+              </Table.TextCell>
+              <Table.TextCell>
+                <Icon
+                  icon="add"
+                  color="green"
+                  size={30}
+                  onClick={() => this._addBucket(bucket)}
+                />
+              </Table.TextCell>
+            </Table.Row>
             {buckets.map(bucket => {
               const { name, id } = bucket;
               return (
@@ -459,29 +491,36 @@ export default class Dashboard extends Component {
                   <Table.TextCell
                     isSelectable
                     onClick={() => {
-                      this.setState({ isShownBlobs: true, bucket: id });
+                      this.setState({
+                        isShownBlobs: true,
+                        bucket: id,
+                        bucket_name: name
+                      });
                       this._fetchBlobs(id);
                     }}
                   >
                     {name}
                   </Table.TextCell>
+                  <Table.TextCell />
                   <Table.TextCell>
-                    <Button
+                    <Icon
+                      icon="edit"
+                      color="blue"
+                      size={30}
                       onClick={() => {
                         this.setState({ isShownEdit: true, id });
                       }}
-                    >
-                      Edit
-                    </Button>
+                    />
                   </Table.TextCell>
                   <Table.TextCell>
-                    <Button
+                    <Icon
+                      icon="delete"
+                      color="red"
+                      size={30}
                       onClick={() => {
                         this.setState({ isShownDelete: true, id });
                       }}
-                    >
-                      Delete
-                    </Button>
+                    />
                   </Table.TextCell>
                 </Table.Row>
               );
@@ -498,21 +537,9 @@ export default class Dashboard extends Component {
       return <h1>Please Wait</h1>;
     } else {
       return (
-        <>
-          Bucket name
-          <TextInput
-            width={300}
-            name="text-input-nickname"
-            placeholder='"Bucket name"'
-            onChange={e => {
-              this._update("bucket", e.target.value);
-            }}
-          />
-          <Button type="primary" onClick={() => this._addBucket(bucket)}>
-            Add bucket
-          </Button>
+        <Card style={{ width: 700 }}>
           {buckets ? this._renderTable() : null}
-        </>
+        </Card>
       );
     }
   }

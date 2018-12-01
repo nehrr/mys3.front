@@ -6,14 +6,13 @@ import "antd/dist/antd.css";
 
 export default class Profile extends Component {
   //profile
+
   constructor(props) {
     super(props);
 
     this.state = {
       nickname: "",
-      email: "",
-      password: "",
-      password_confirmation: ""
+      email: ""
     };
   }
 
@@ -36,10 +35,20 @@ export default class Profile extends Component {
       uuid = decoded.uuid;
       token = meta;
     }
-    const { nickname, email, password, password_confirmation } = this.state;
-    user = { nickname, email, password, password_confirmation };
-    if (user.password !== user.password_confirmation) {
-      this._err("Passwords don't match");
+    const {
+      newNickname,
+      newEmail,
+      newPassword,
+      newPassword_confirmation
+    } = this.state;
+    if (!newPassword || newPassword_confirmation) {
+      user = { nickname: newNickname, email: newEmail };
+    } else {
+      user = { newNickname, newEmail, newPassword, newPassword_confirmation };
+      if (user.password !== user.password_confirmation) {
+        this._err("Passwords don't match");
+        return;
+      }
     }
 
     const data = await fetch(`http://localhost:5000/api/users/${uuid}/`, {
@@ -79,7 +88,8 @@ export default class Profile extends Component {
     });
 
     if (data.status === 400) {
-      this._err("Uh oh, something went wrong");
+      const res = await data.json();
+      this._err(res.err.fields);
     } else {
       toaster.notify("Goodbye");
       window.location.href = "/";
@@ -113,13 +123,13 @@ export default class Profile extends Component {
           actions={[
             <Button type="primary" onClick={() => this._updateUser(this.state)}>
               Edit
-            </Button>,
-            <Button
-              type="danger"
-              onClick={() => this.setState({ isShownDelete: true })}
-            >
-              Delete your account
             </Button>
+            // <Button
+            //   type="danger"
+            //   onClick={() => this.setState({ isShownDelete: true })}
+            // >
+            //   Delete your account
+            // </Button>
           ]}
         >
           <>
@@ -129,7 +139,7 @@ export default class Profile extends Component {
               name="text-input-nickname"
               placeholder={nickname}
               onChange={e => {
-                this._update("nickname", e.target.value);
+                this._update("newNickname", e.target.value);
               }}
             />
           </>
@@ -141,7 +151,7 @@ export default class Profile extends Component {
               name="text-input-email"
               placeholder={email}
               onChange={e => {
-                this._update("email", e.target.value);
+                this._update("newEmail", e.target.value);
               }}
             />
           </>
@@ -154,7 +164,7 @@ export default class Profile extends Component {
               name="text-input-password"
               placeholder="Password"
               onChange={e => {
-                this._update("password", e.target.value);
+                this._update("newPassword", e.target.value);
               }}
             />
           </>
@@ -167,7 +177,7 @@ export default class Profile extends Component {
               name="text-input-password-confirmation"
               placeholder="Password Confirmation"
               onChange={e => {
-                this._update("password_confirmation", e.target.value);
+                this._update("newPassword_confirmation", e.target.value);
               }}
             />
           </>

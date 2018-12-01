@@ -1,20 +1,17 @@
 import React, { Component, Fragment } from "react";
 import jwt from "jsonwebtoken";
-import {
-  BrowserRouter as Router,
-  Route,
-  Link,
-  Redirect
-} from "react-router-dom";
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import { TabNavigation, Tab, toaster } from "evergreen-ui";
 import "./App.css";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
+import Login from "./pages/Login";
 
 const tab = [
   { name: "Home", url: "/" },
+  { name: "Login", url: "/login" },
   { name: "Register", url: "/register" }
 ];
 
@@ -56,9 +53,6 @@ class App extends Component {
       } else {
         this.handleUser(user, token);
       }
-
-      // JSON = CHECK WITH SERVER IF NO EXPIRATION
-      // this.handleUser(json.data.user, json.data.meta);
     }
   };
 
@@ -73,12 +67,10 @@ class App extends Component {
       isConnected: false,
       user: null
     });
-
-    return <Redirect to="/" />;
   };
 
   _menu = array => {
-    const { user } = this.state;
+    const { user, isConnected } = this.state;
     return (
       <Router>
         <Fragment>
@@ -86,18 +78,21 @@ class App extends Component {
             <TabNavigation>
               {array.map((tab, index) => (
                 <Tab key={tab.name} href={tab.url} id={tab.name}>
-                  <Link to={tab.url}> {tab.name}</Link>
+                  <Link to={tab.url}>{tab.name}</Link>
                 </Tab>
               ))}
-              <Tab onSelect={this._logout}>
-                <Link to="/">Logout</Link>
-              </Tab>
+              {isConnected && (
+                <Tab onSelect={this._logout}>
+                  <Link to="/">Logout</Link>
+                </Tab>
+              )}
             </TabNavigation>
           </>
+
+          <Route exact path="/" render={props => <Home {...props} />} />
           <Route
-            exact
-            path="/"
-            render={props => <Home {...props} handleUser={this.handleUser} />}
+            path="/login"
+            render={props => <Login {...props} handleUser={this.handleUser} />}
           />
           <Route path="/register" component={Register} />
           <Route path="/dashboard" render={props => <Dashboard {...props} />} />
@@ -114,9 +109,19 @@ class App extends Component {
     const { isConnected } = this.state;
 
     if (!isConnected) {
-      return <div className="App"> {this._menu(tab)} </div>;
+      return (
+        <div className="App">
+          {" "}
+          <header className="App-header">{this._menu(tab)} </header>
+        </div>
+      );
     } else {
-      return <div className="App"> {this._menu(tabCo)} </div>;
+      return (
+        <div className="App">
+          {" "}
+          <header className="App-header">{this._menu(tabCo)}</header>{" "}
+        </div>
+      );
     }
   }
 }

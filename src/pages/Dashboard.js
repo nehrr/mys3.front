@@ -1,10 +1,19 @@
 import React, { Component } from "react";
 import jwt from "jsonwebtoken";
-import { Table, TextInput, Button, toaster, Dialog } from "evergreen-ui";
+import {
+  Table,
+  TextInput,
+  Button,
+  toaster,
+  Dialog,
+  SideSheet,
+  Paragraph,
+  FilePicker
+} from "evergreen-ui";
 
 export default class Dashboard extends Component {
   //arbo
-  state = { bucket: "", isLoading: true, isShown: false };
+  state = { bucket: "", isLoading: true, isShown: false, myFile: null };
 
   _update(field, value) {
     this.setState({ [field]: value });
@@ -61,6 +70,31 @@ export default class Dashboard extends Component {
     data = await data.json();
 
     return data.data.buckets;
+  }
+
+  async _fetchBlobs(id) {
+    let uuid, token;
+    const meta = JSON.parse(localStorage.getItem("myS3.app"));
+    if (meta) {
+      const decoded = jwt.decode(meta);
+      uuid = decoded.uuid;
+      token = meta;
+    }
+
+    let data = await fetch(
+      `http://localhost:5000/api/users/${uuid}/buckets/${id}/blobs`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    data = await data.json();
+
+    if (data.data.blobs) {
+      this.setState({ blobs: data.data.blobs });
+    }
   }
 
   async componentDidMount() {
@@ -131,8 +165,96 @@ export default class Dashboard extends Component {
     this.setState({ isShownDelete: false, id: null });
   }
 
+  async _uploadBlob() {
+    const { blob, myFile, bucket } = this.state;
+
+    let formData = new FormData();
+
+    formData.append("file_to_upload", myFile);
+    formData.append("name", blob);
+
+    let uuid, token;
+    const meta = JSON.parse(localStorage.getItem("myS3.app"));
+    if (meta) {
+      const decoded = jwt.decode(meta);
+      uuid = decoded.uuid;
+      token = meta;
+    }
+    const data = await fetch(
+      `http://localhost:5000/api/users/${uuid}/buckets/${bucket}/blobs/`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
+      }
+    );
+
+    if (data.status === 400) {
+      this._err("Uh oh, something went wrong");
+    } else {
+      toaster.notify("Your blob was added");
+      const blobs = await this._fetchBlobs(bucket);
+      this.setState({ blobs });
+    }
+  }
+
+  _renderBlobs(id) {
+    // this._fetchBlobs(id);
+    const { blobs } = this.state;
+    return (
+      <Table>
+        <Table.Head>
+          <Table.TextHeaderCell>Blob name</Table.TextHeaderCell>
+          <Table.TextHeaderCell>Actions</Table.TextHeaderCell>
+        </Table.Head>
+        <Table.Body height={240}>
+          {blobs.map(blob => {
+            const { name, id } = blob;
+            return (
+              <Table.Row
+                key={id}
+                isSelectable
+                onSelect={() => {
+                  this.setState({ isShownBlobs: true, id });
+                }}
+              >
+                <Table.TextCell>{name}</Table.TextCell>
+                <Table.TextCell>
+                  <Button
+                    onClick={() => {
+                      this.setState({ isShownEdit: true, id });
+                    }}
+                  >
+                    Edit
+                  </Button>
+                </Table.TextCell>
+                <Table.TextCell>
+                  <Button
+                    onClick={() => {
+                      this.setState({ isShownDelete: true, id });
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </Table.TextCell>
+              </Table.Row>
+            );
+          })}
+        </Table.Body>
+      </Table>
+    );
+  }
+
+  _handleselectedFile = event => {
+    this.setState({
+      myFile: event.target.files[0]
+    });
+  };
+
   _renderTable() {
-    const { buckets, bucket } = this.state;
+    const { buckets, bucket, blobs } = this.state;
     return (
       <>
         <Dialog
@@ -165,6 +287,37 @@ export default class Dashboard extends Component {
         >
           Are you sure you want to delete this bucket ?
         </Dialog>
+        <SideSheet
+          isShown={this.state.isShownBlobs}
+          onCloseComplete={() => this.setState({ isShownBlobs: false })}
+        >
+          <Paragraph margin={40}>Blobs</Paragraph>
+
+          <TextInput
+            width={300}
+            name="text-input-blob-name"
+            placeholder="Name"
+            onChange={e => {
+              this._update("blob", e.target.value);
+            }}
+          />
+
+          <input
+            type="file"
+            name=""
+            id=""
+            onChange={this._handleselectedFile}
+          />
+          <Button
+            onClick={() => {
+              this._uploadBlob();
+            }}
+          >
+            Upload
+          </Button>
+
+          {blobs ? this._renderBlobs() : null}
+        </SideSheet>
         <Table>
           <Table.Head>
             <Table.TextHeaderCell>Bucket name</Table.TextHeaderCell>
@@ -174,7 +327,14 @@ export default class Dashboard extends Component {
             {buckets.map(bucket => {
               const { name, id } = bucket;
               return (
-                <Table.Row key={id}>
+                <Table.Row
+                  key={id}
+                  isSelectable
+                  onSelect={() => {
+                    this.setState({ isShownBlobs: true, bucket: id });
+                    this._fetchBlobs(id);
+                  }}
+                >
                   <Table.TextCell>{name}</Table.TextCell>
                   <Table.TextCell>
                     <Button

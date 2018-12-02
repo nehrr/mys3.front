@@ -341,7 +341,16 @@ export default class Dashboard extends Component {
             const { name, id } = blob;
             return (
               <Table.Row key={id}>
-                <Table.TextCell>{name}</Table.TextCell>
+                <Table.TextCell style={{ textAlign: "left" }}>
+                  {" "}
+                  <Icon
+                    icon="folder-close"
+                    color="grey"
+                    size={20}
+                    style={{ textAlign: "left", marginRight: 10 }}
+                  />{" "}
+                  {name}
+                </Table.TextCell>
                 <Table.TextCell />
                 <Table.TextCell>
                   <Icon
@@ -465,7 +474,7 @@ export default class Dashboard extends Component {
           </Table.Head>
           <Table.Body>
             <Table.Row>
-              <Table.TextCell>
+              <Table.TextCell style={{ textAlign: "left" }}>
                 <TextInput
                   style={{ textAlign: "center" }}
                   name="text-input-nickname"
@@ -479,7 +488,7 @@ export default class Dashboard extends Component {
                 <Icon
                   icon="add"
                   color="green"
-                  size={30}
+                  size={20}
                   onClick={() => this._addBucket(bucket)}
                 />
               </Table.TextCell>
@@ -489,7 +498,9 @@ export default class Dashboard extends Component {
               return (
                 <Table.Row key={id}>
                   <Table.TextCell
+                    size={200}
                     isSelectable
+                    style={{ textAlign: "left" }}
                     onClick={() => {
                       this.setState({
                         isShownBlobs: true,
@@ -499,6 +510,12 @@ export default class Dashboard extends Component {
                       this._fetchBlobs(id);
                     }}
                   >
+                    <Icon
+                      icon="folder-close"
+                      color="grey"
+                      size={20}
+                      style={{ textAlign: "left", marginRight: 10 }}
+                    />{" "}
                     {name}
                   </Table.TextCell>
                   <Table.TextCell />
@@ -506,7 +523,7 @@ export default class Dashboard extends Component {
                     <Icon
                       icon="edit"
                       color="blue"
-                      size={30}
+                      size={20}
                       onClick={() => {
                         this.setState({ isShownEdit: true, id });
                       }}
@@ -516,7 +533,7 @@ export default class Dashboard extends Component {
                     <Icon
                       icon="delete"
                       color="red"
-                      size={30}
+                      size={20}
                       onClick={() => {
                         this.setState({ isShownDelete: true, id });
                       }}
